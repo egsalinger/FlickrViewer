@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:flickrActivity="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/search"
+        android:title="@string/search_title"
+        flickrActivity:actionViewClass="android.support.v7.widget.SearchView"
+        flickrActivity:showAsAction="collapseActionView|ifRoom" />
+    <item
+        android:id="@+id/action_reset"
+        android:title="@string/action_reset"
+        flickrActivity:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_refresh"
+        android:title="@string/action_refresh"
+        flickrActivity:showAsAction="ifRoom" />
+</menu>
