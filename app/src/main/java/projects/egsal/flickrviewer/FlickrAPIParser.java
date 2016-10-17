@@ -10,12 +10,20 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Created by egsal on 8/18/15.
+ * Created by Eric Salinger on 8/18/15.
+ *
+ * This is a primitive Flickr API parser, which uses Flickr's public API to perform searches on tags.
+ * When I created it (8/18/2015), I was having some trouble parsing the native JSON from Flickr's
+ * responses. To deal with this, I used a Scanner object and some creative thinking to parse the
+ * server output.
+ *
+ * Note that this API provides direct URLs, so we don't have to construct URLs, as we would with a
+ * new approach.
  */
+@Deprecated
 public class FlickrAPIParser extends AsyncTask<String, URL, ArrayList<URL>> {
 
-
-    private FlickrAdapter theAdapter;
+    private final FlickrAdapter theAdapter;
 
     public FlickrAPIParser(FlickrAdapter adapter) {
         theAdapter = adapter;
@@ -30,7 +38,7 @@ public class FlickrAPIParser extends AsyncTask<String, URL, ArrayList<URL>> {
             ArrayList<URL> imageLocations = new ArrayList<URL>();
 
             // For some reason I was having an issue parsing the stream as JSON. Since this is a
-            //fast run, and I only care the media locations, we'll use scanner
+            //fast run, and I only care about the media locations, we'll use scanner
             Scanner scanner = new Scanner(feed.openStream());
 
             scanner.useDelimiter("\n");

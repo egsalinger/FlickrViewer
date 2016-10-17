@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.android.volley.toolbox.NetworkImageView
+    android:id="@+id/v2_full_image"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scaleType="fitCenter">
+
+</com.android.volley.toolbox.NetworkImageView>

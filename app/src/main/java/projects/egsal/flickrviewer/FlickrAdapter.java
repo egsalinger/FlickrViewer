@@ -2,6 +2,7 @@ package projects.egsal.flickrviewer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -17,19 +18,18 @@ import java.util.ArrayList;
 /**
  * Created by egsal on 8/17/15.
  */
+@Deprecated
 public class FlickrAdapter extends ArrayAdapter {
 
 
-    private Context context;
-    private ArrayList<Bitmap> data;
-    private ArrayList<URL> fullAddresses;
-    private int squareDimension;
+    private final Context context;
+    private final ArrayList<FlickrImage> data;
+    private final int squareDimension;
 
-    public FlickrAdapter(Context context, int layoutResourceId, ArrayList<Bitmap> theData) {
+    public FlickrAdapter(Context context, int layoutResourceId, ArrayList<FlickrImage> theData) {
         super(context, layoutResourceId, theData);
         this.context = context;
         data = theData;
-        fullAddresses = new ArrayList<URL>();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point p = new Point();
@@ -40,21 +40,39 @@ public class FlickrAdapter extends ArrayAdapter {
     public void loadBitmapFromURL(URL newURL) {
         BitmapImageLoader loader = new BitmapImageLoader(new BitmapDownloadListener() {
             @Override
-            public void downloadComplete(Bitmap b, URL from) {
-                // This is slightly costly to the user. We have to download the image first and
-                // scale it down second, unless the compiler somehow optimizes this for us (which is
-                // not really what you want to rely on).
-                Bitmap bitmap = Bitmap.createScaledBitmap(b, squareDimension, squareDimension, false);
-                addBitmapWithURL(from, bitmap);
+            public void downloadComplete(FlickrImage b) {
+                addBitmapWithURL(b);
             }
         });
         loader.execute(newURL);
     }
 
+    private int calculateSampleSize(BitmapFactory.Options options) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        // We're scaling down to the largest dimensions bigger than our square.
+        // It's possible the image won't be a square, in which case we want to do this.
+        if (height > squareDimension && width > squareDimension) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= squareDimension
+                    && (halfWidth / inSampleSize) >= squareDimension) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
     // Don't need to synchronize this because this is only called by one thread.
-    public void addBitmapWithURL(URL url, Bitmap bitmap) {
-        data.add(bitmap);
-        fullAddresses.add(url);
+    public void addBitmapWithURL(FlickrImage image) {
+        data.add(image);
         this.notifyDataSetChanged();
     }
 
@@ -62,16 +80,33 @@ public class FlickrAdapter extends ArrayAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.cropped_image, null);
         }
-        Bitmap item = data.get(position);
+        Bitmap item = getBitmapFrom(position);
         if (item != null) {
             ((ImageView) convertView).setImageBitmap(item);
         }
         return convertView;
     }
 
+    private Bitmap getBitmapFrom(int position) {
+        if ( data.size() < position){
+            return null;
+        }
+        // This is slightly costly to the user.
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        final byte [] bytes = data.get(position).getImageData();
+        // get the image dimensions only.
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+        // Now, calculate our sample size.
+        options.inSampleSize = calculateSampleSize(options);
+        options.inJustDecodeBounds = false;
+        // Finally, get full sized image.
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+    }
+
     public URL getURLForItemAtPosition(int position) {
-        if (fullAddresses.size() > position) {
-            return fullAddresses.get(position);
+        if (data.size() > position) {
+            return data.get(position).getUrl();
         } else {
             return null;
         }
@@ -80,7 +115,6 @@ public class FlickrAdapter extends ArrayAdapter {
     @Override
     public void clear() {
         super.clear();
-        fullAddresses.clear();
         data.clear();
     }
 

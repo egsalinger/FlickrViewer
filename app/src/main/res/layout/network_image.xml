@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.android.volley.toolbox.NetworkImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:cropToPadding="true"
+    android:layout_height="match_parent"
+    android:layout_width="70dp"
+    android:scaleType="centerCrop"
+    android:layout_gravity="center"/>

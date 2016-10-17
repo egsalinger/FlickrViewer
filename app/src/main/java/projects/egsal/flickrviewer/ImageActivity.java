@@ -1,6 +1,7 @@
 package projects.egsal.flickrviewer;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@Deprecated
 public class ImageActivity extends AppCompatActivity {
 
     ImageView theImage;
@@ -32,8 +34,8 @@ public class ImageActivity extends AppCompatActivity {
             try {
                 BitmapImageLoader load = new BitmapImageLoader(new BitmapDownloadListener() {
                     @Override
-                    public void downloadComplete(Bitmap b, URL from) {
-                        theImage.setImageBitmap(b);
+                    public void downloadComplete(FlickrImage b) {
+                        theImage.setImageBitmap(BitmapFactory.decodeByteArray(b.getImageData(), 0, b.getImageData().length));
                     }
                 });
                 load.execute(new URL(resource));
